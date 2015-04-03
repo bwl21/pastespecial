@@ -56,7 +56,8 @@ var COMPONENTNAME = 'atto_pastespecial',
             '<div>' +
             '{{get_string "pastehere" component}}' +
             '</div>' +
-            '<div id="{{elementid}}_{{CSS.IFRAME}}" class="{{CSS.IFRAME}}"></div>' +
+            '<div id="{{elementid}}_{{CSS.IFRAME}}" class="{{CSS.IFRAME}}" contentEditable="true"' +
+            'style="width:100%;height:200px;overflow-y:scroll;border: 1px solid grey"></div>' +
             '<input type="radio" class="{{CSS.PASTEFROMWORD}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMWORD}}" checked>' +
             '<label for="{{elementid}}_{{CSS.PASTEFROMWORD}}">{{get_string "pastefromword" component}}</label>' +
             '<br>' +
@@ -158,7 +159,8 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         dialogue.show();
 
         // Set the iframe target for later use.
-        this._iframe = this._addIframe(Y.one(SELECTORS.IFRAME));
+        this._iframe = Y.one(SELECTORS.IFRAME);
+        this._iframe.focus();
     },
 
     /**
@@ -180,7 +182,7 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         }).hide();
 
         // Obtain the pasted content.
-        value = this._iframe.one('body').getHTML();
+        value = this._iframe.getHTML();
 
         // Figure out which option is checked.
         checked = Y.one('input[name=from]:checked');
@@ -240,27 +242,6 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
     },
 
     /**
-     * Prepare the HTML within the iframe
-     *
-     * @method _addIframe
-     * @param container Location of the iframe to modify
-     * @return Target to the inside of the iframe
-     */
-    _addIframe: function(container) {
-        // Set internal HTML of the iframe along with some styling.
-        container.setHTML('<iframe id="' + CSS.IFRAME + '" src="javascript:\'\';" frameBorder="0" style="border: 1px solid gray"></iframe>');
-        var ifr = Y.one(SELECTORS.IFRAMEID);
-        var doc = ifr.get('contentWindow.document');
-
-        // Set the iframe to be editable by the user.
-        doc.designMode = 'on';
-        doc.one('body').setAttribute('contenteditable', 'true');
-        doc.one('body').focus();
-
-        return doc;
-    },
-
-    /**
      * Handle the text coming from Microsoft Word
      *
      * @method _handleWord
@@ -313,7 +294,8 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
                     output += '<br>';
                     text = text.substring(last+1, text.length);
                 }
-                else if(text.substring(first, last+7) === '<o:p></o:p>') {
+                else if(text.substring(first, last+7) === '<o:p></o:p>'
+                        || text.substring(first + 1, first + 6) === '/font') {
                     // Weird thing word does for end of line, skip it.
                     output = output;
                     text = text.substring(last+1, text.length);
@@ -323,9 +305,9 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
                     output = this._handleFont(text.substring(first, last+1), output, text, origin);
                     text = text.substring(text.indexOf('</font>') + 7, text.length);
                 }
-                else if(text.substring(first + 1, first + 6) !== '/font') {
+                else {
                     // It's a tag we want to handle, so let's handle it.
-                    output = this._handleTags(text.substring(first, last+1), origin);
+                    output += this._handleTags(text.substring(first, last+1), origin);
                     text = text.substring(last+1, text.length);
                 }
             }
