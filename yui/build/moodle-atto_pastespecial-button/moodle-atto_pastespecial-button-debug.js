@@ -720,8 +720,12 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
                 text = text.substring(second, text.length);
             }
         }
-
-        return raw.substring(0, raw.length-3);
+        if(raw.substring(raw.length-3, raw.length) === '<p>') {
+            return raw.substring(0, raw.length-3);
+        }
+        else {
+            return raw;
+        }
     }
 });
 
