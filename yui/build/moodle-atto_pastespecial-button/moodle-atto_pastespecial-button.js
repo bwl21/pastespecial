@@ -186,6 +186,8 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         // Obtain the pasted content.
         value = this._iframe.getHTML();
 
+        value = this._cleanSafari(value);
+
         // Figure out which option is checked.
         checked = Y.one('input[name=from]:checked');
 
@@ -263,6 +265,22 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
      */
     _handleGDoc: function(text) {
         return this._findTags(text, 'gdoc');
+    },
+
+    _cleanSafari: function(text) {
+        if(text.indexOf('<!--EndFragment-->') !== -1) {
+            text = text.substring(0, text.indexOf('<!--EndFragment-->'));
+        }
+        while(true) {
+            if(text.indexOf('-->') === -1) {
+                break;
+            }
+            else {
+                text = text.substring(text.indexOf('-->') + 3, text.length);
+            }
+        }
+
+        return text;
     },
 
     /**
@@ -683,34 +701,35 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             last;
 
         // Start it all off with a clean p tag
-        raw = '<p>';
+        raw = '';
 
         while(true) {
             first = text.indexOf('<');
             second = text.indexOf('<', first+1);
             last = text.indexOf('>');
             if(first === -1
-                || second === -1) {
+                || last === -1) {
                 // We found no tags, let's step out
                 break;
             }
-            else if(last < second) {
+            else if(last < second || second === -1) {
                 // We found a tag, what's inside?
                 raw += text.substring(0, first);
-                if(text.substring(first, first+7) !== '</span>'
-                    && text[first+1] === '/'
-                    && raw.substring(raw.length-4, raw.length) !== '</p>') {
-                    // It's not a span and we have an open tag
-                    // Let's close out and start a new tag
-                    raw += '</p><p>';
+                if(text.substring(first, first+4) === '</p>') {
+                    // Let's close out the </p>
+                    raw += '</p>';
+                }
+                else if(text.substring(first, first+2) === '<p') {
+                    //Found an open p
+                    raw += '<p>';
+                }
+                else if(text.substring(first, last+1) === '<br>') {
+                    // A nice clean break
+                    raw += '<br>';
                 }
                 if(last === text.length-1) {
                     // We are at the end of the text
                     break;
-                }
-                if(text.substring(first, last+1) === '<br>') {
-                    // A nice clean break
-                    raw += '<br>';
                 }
                 text = text.substring(last+1, text.length);
             }
