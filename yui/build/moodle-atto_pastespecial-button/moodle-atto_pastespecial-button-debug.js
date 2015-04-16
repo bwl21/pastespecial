@@ -124,10 +124,10 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             this._libreStyle = STYLES.LIBRE;
         }
         if(params.otherCSS !== '') {
-            this.otherStyle = params.otherCSS;
+            this._otherStyle = params.otherCSS;
         }
         else {
-            this.otherStyle = STYLES.GDOC + STYLES.LIBRE + STYLES.WORD;
+            this._otherStyle = STYLES.GDOC + STYLES.LIBRE + STYLES.WORD;
         }
 
         // Add the button
