@@ -713,17 +713,31 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             else if(last < second || second === -1) {
                 // We found a tag, what's inside?
                 raw += text.substring(0, first);
-                if(text.substring(first, first+4) === '</p>') {
+                if(text.substring(first, first+5) === '<span' ||
+                   text.substring(first, first+6) === '</span') {
+                    raw = raw;
+                }
+                else if(text.substring(first, first+4) === '</p>' &&
+                        raw.substring(raw.length-4, raw.length) !== '</p>') {
                     // Let's close out the </p>
                     raw += '</p>';
                 }
-                else if(text.substring(first, first+2) === '<p') {
+                else if(text.substring(first, first+2) === '<p' &&
+                        raw.substring(raw.length-3, raw.length) !== '<p>') {
                     //Found an open p
                     raw += '<p>';
                 }
                 else if(text.substring(first, last+1) === '<br>') {
                     // A nice clean break
                     raw += '<br>';
+                }
+                else if(text[first+1] === '/' &&
+                        raw.substring(raw.length-4, raw.length) !== '</p>') {
+                    raw += '</p>';
+                }
+                else if(raw.substring(raw.length-3, raw.length) !== '<p>' &&
+                        text[first+1] !== '/') {
+                    raw += '<p>';
                 }
                 if(last === text.length-1) {
                     // We are at the end of the text
