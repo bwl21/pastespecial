@@ -106,28 +106,24 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         // Pull in the settings if they are not empty
         // If they are empty, set to the default above
         if(params.wordCSS !== '') {
-            this._wordStyle = params.wordCSS;
-        }
-        else {
+            this._wordStyle = params.wordCSS.split(',');
+        } else {
             this._wordStyle = STYLES.WORD;
         }
         if(params.gdocCSS !== '') {
-            this._gdocStyle = params.gdocCSS;
-        }
-        else {
+            this._gdocStyle = params.gdocCSS.split(',');
+        } else {
             this._gdocStyle = STYLES.GDOC;
         }
         if(params.libreCSS !== '') {
-            this._libreStyle = params.libreCSS;
-        }
-        else {
+            this._libreStyle = params.libreCSS.split(',');
+        } else {
             this._libreStyle = STYLES.LIBRE;
         }
         if(params.otherCSS !== '') {
-            this._otherStyle = params.otherCSS;
-        }
-        else {
-            this._otherStyle = STYLES.GDOC + STYLES.LIBRE + STYLES.WORD;
+            this._otherStyle = params.otherCSS.split(',');
+        } else {
+            this._otherStyle = this._gdocStyle + this._wordStyle + this._libreStyle;
         }
 
         // Add the button
@@ -338,6 +334,7 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             }
             else {
                 // No more tags, let's step out.
+                text = text.substring(first, text.length);
                 output += text;
                 break;
             }
@@ -588,7 +585,8 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         var span,
             badSpan,
             front,
-            end;
+            end,
+            toBreak;
 
         while(true) {
             // Remove all spans without style.
@@ -598,9 +596,8 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
                 end = text.substring(span + 6, text.length);
                 end.replace('</span>', '');
                 text = front + end;
-            }
-            else {
-                break;
+            } else {
+                toBreak = true;
             }
             // Any <tag><span style="">text</span></tag>
             // will become <tag style=""></tag>.
@@ -608,14 +605,17 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             if (text.substring(badSpan - 6, 7) !== '</span>') {
                 front = text.substring(0, badSpan);
                 end = text.substring(badSpan + 6, text.length);
-                end.replace('</span>', '');
+                end = end.replace('</span>', '');
                 if(front[front.length-1] === '"'
                     && end.substring(0, 8) === ' style="') {
                     text = front.substring(0, front.length-1) + end.substring(8, end.length);
-                }
-                else {
+                    toBreak = false;
+                } else {
                     text = front + end;
                 }
+            }
+            if(toBreak) {
+                break;
             }
         }
 
@@ -669,7 +669,7 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
                 value = style.substring(style.indexOf(':') + 1, style.length);
             }
             // What options do we care about?
-            if(comparison.indexOf(option) !== -1) {
+            if(comparison.indexOf(option) !== -1 && value !== '') {
                 if(value !== 'initial'
                 && value !== 'inherit'
                 && value !== 'normal'
