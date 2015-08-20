@@ -191,17 +191,13 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         if (value !== '') {
             if(checked.hasClass(CSS.PASTEFROMWORD)) {
                 value = this._handleWord(value);
-            }
-            else if(checked.hasClass(CSS.PASTEFROMGDOC)) {
+            } else if(checked.hasClass(CSS.PASTEFROMGDOC)) {
                 value = this._handleGDoc(value);
-            }
-            else if(checked.hasClass(CSS.PASTEFROMLIBRE)) {
+            } else if(checked.hasClass(CSS.PASTEFROMLIBRE)) {
                 value = this._handleLibre(value);
-            }
-            else if(checked.hasClass(CSS.PASTEFROMOTHER)) {
+            } else if(checked.hasClass(CSS.PASTEFROMOTHER)) {
                 value = this._handleOther(value);
-            }
-            else {
+            } else {
                 value = this._handleUnformatted(value);
             }
 
@@ -270,8 +266,7 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         while(true) {
             if(text.indexOf('-->') === -1) {
                 break;
-            }
-            else {
+            } else {
                 text = text.substring(text.indexOf('-->') + 3, text.length);
             }
         }
@@ -309,30 +304,25 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
                     // A nice clean line break.
                     output += '<br>';
                     text = text.substring(last+1, text.length);
-                }
-                else if(text.substring(first, last+7) === '<o:p></o:p>'
+                } else if(text.substring(first, last+7) === '<o:p></o:p>'
                         || text.substring(first + 1, first + 6) === '/font') {
                     // Weird thing word does for end of line, skip it.
                     output = output;
                     text = text.substring(last+1, text.length);
-                }
-                else if(text.substring(first + 1, first + 5) === 'font') {
+                } else if(text.substring(first + 1, first + 5) === 'font') {
                     // Woaw, found a weird font tag, must be Libre.
                     output = this._handleFont(text.substring(first, last+1), output, text, origin);
                     text = text.substring(text.indexOf('</font>') + 7, text.length);
-                }
-                else {
+                } else {
                     // It's a tag we want to handle, so let's handle it.
                     output += this._handleTags(text.substring(first, last+1), origin);
                     text = text.substring(last+1, text.length);
                 }
-            }
-            else if(second !== -1){
+            } else if(second !== -1){
                 // Somebody put in a plain character.
                 output += '<';
                 text = text.substring(first+1, text.length);
-            }
-            else {
+            } else {
                 // No more tags, let's step out.
                 text = text.substring(first, text.length);
                 output += text;
@@ -401,14 +391,15 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             first = 0,
             second = 0,
             tagStart,
-            tagEnd;
+            tagEnd,
+            newString = '';
 
         tagStart = incoming.indexOf('<font');
         tagEnd = incoming.indexOf('>', tagStart);
 
         // Get rid of pesky spaces and line breaks.
         // Only for comparison.
-        noBreaks = current.replace(/\s+g/, '');
+        noBreaks = current.replace(/\s+/g, '');
         noBreaks = noBreaks.replace(/(\r\n|\n|\r)/gm,"");
         // This only ever happens in LibreOffice, so specific reference.
         face = text.indexOf('face="');
@@ -434,8 +425,7 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             // Something's weird, let's alert the user and step out of this.
             current = '<span style="' + output + '">' + incoming.substring(tagEnd + 1, incoming.indexOf('</font>')) + '</span>';
             return current;
-        }
-        else if(noBreaks[noBreaks.length-2] !== '"') {
+        } else if(noBreaks[noBreaks.length-2] !== '"') {
             // Empty tag preceeding, add as style.
             while(true) {
                 first = current.indexOf('>', second + 1);
@@ -445,8 +435,7 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
                 }
             }
             newString = current.substring(0, first) + ' style="' + output + '">';
-        }
-        else if(noBreaks[noBreaks.length-2] === '"') {
+        } else if(noBreaks[noBreaks.length-2] === '"') {
             // Found a previous style, let's compound on it.
             while(true) {
                 first = current.indexOf('">', second + 1);
@@ -499,41 +488,29 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             additional = text.substring(text.indexOf(' '), text.length-1);
             additional = this._handleAdditional(additional);
         }
-
         if(text.substring(0, 2) === '</') {
             // Closing tags have nothing we need to handle.
             // Close the tag and be done.
             return text;
-        }
-        // Alright, which tag is it?
-        else if(tag === 'span') {
+        } else if(tag === 'span') {
             output += '<span';
-        }
-        else if(tag.substring(0, 1) === 'h') {
+        } else if(tag.substring(0, 1) === 'h') {
             output += '<h' + tag[1];
-        }
-        else if(tag === 'div') {
+        } else if(tag === 'div') {
             output += '<div';
-        }
-        else if(tag === 'ul') {
+        } else if(tag === 'ul') {
             output += '<ul';
-        }
-        else if(tag === 'ol') {
+        } else if(tag === 'ol') {
             output += '<ol';
-        }
-        else if(tag === 'li') {
+        } else if(tag === 'li') {
             output += '<li';
-        }
-        else if(tag === 'b') {
+        } else if(tag === 'b') {
             output += '<b';
-        }
-        else if(tag === 'i') {
+        } else if(tag === 'i') {
             output += '<i';
-        }
-        else if(tag === 'u') {
+        } else if(tag === 'u') {
             output += '<u';
-        }
-        else {
+        } else {
             // What's the worst that could happen? Let's go with <p>.
             output += '<p';
         }
@@ -639,14 +616,11 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         // Where are we bringing this information in from?
         if(origin === 'gdoc') {
             comparison = this._gdocStyle;
-        }
-        else if(origin === 'libre') {
+        } else if(origin === 'libre') {
             comparison = this._libreStyle;
-        }
-        else if(origin === 'word') {
+        } else if(origin === 'word') {
             comparison = this._wordStyle;
-        }
-        else {
+        } else {
             comparison = this._otherStyle;
         }
 
@@ -662,8 +636,7 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             option = clean.substring(0, clean.indexOf(':'));
             if(style.indexOf(';') !== -1) {
                 value = style.substring(style.indexOf(':') + 1, style.indexOf(';'));
-            }
-            else {
+            } else {
                 // We are at the last CSS entry, and it does not end with ;
                 // For SHAME!
                 value = style.substring(style.indexOf(':') + 1, style.length);
@@ -684,7 +657,6 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             style = style.substring(style.indexOf(';') + 1, style.length);
             clean = clean.substring(clean.indexOf(';') + 1, clean.length);
         }
-
         return output;
     },
 
@@ -711,33 +683,27 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
                 || last === -1) {
                 // We found no tags, let's step out
                 break;
-            }
-            else if(last < second || second === -1) {
+            } else if(last < second || second === -1) {
                 // We found a tag, what's inside?
                 raw += text.substring(0, first);
                 if(text.substring(first, first+5) === '<span' ||
                    text.substring(first, first+6) === '</span') {
                     raw = raw;
-                }
-                else if(text.substring(first, first+4) === '</p>' &&
+                } else if(text.substring(first, first+4) === '</p>' &&
                         raw.substring(raw.length-4, raw.length) !== '</p>') {
                     // Let's close out the </p>
                     raw += '</p>';
-                }
-                else if(text.substring(first, first+2) === '<p' &&
+                } else if(text.substring(first, first+2) === '<p' &&
                         raw.substring(raw.length-3, raw.length) !== '<p>') {
                     //Found an open p
                     raw += '<p>';
-                }
-                else if(text.substring(first, last+1) === '<br>') {
+                } else if(text.substring(first, last+1) === '<br>') {
                     // A nice clean break
                     raw += '<br>';
-                }
-                else if(text[first+1] === '/' &&
+                } else if(text[first+1] === '/' &&
                         raw.substring(raw.length-4, raw.length) !== '</p>') {
                     raw += '</p>';
-                }
-                else if(raw.substring(raw.length-3, raw.length) !== '<p>' &&
+                } else if(raw.substring(raw.length-3, raw.length) !== '<p>' &&
                         text[first+1] !== '/') {
                     raw += '<p>';
                 }
@@ -746,8 +712,7 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
                     break;
                 }
                 text = text.substring(last+1, text.length);
-            }
-            else {
+            } else {
                 // Somebody put '<' in as a character
                 raw += text.substring(0, second);
                 text = text.substring(second, text.length);
@@ -755,8 +720,7 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         }
         if(raw.substring(raw.length-3, raw.length) === '<p>') {
             return raw.substring(0, raw.length-3);
-        }
-        else {
+        } else {
             return raw;
         }
     }

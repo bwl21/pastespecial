@@ -204,7 +204,8 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
                 this.editor.focus();
                 this.editor.append(value);
             }
-            // Instead, replace the selected content. else {
+            // Instead, replace the selected content.
+            else {
                 host.setSelection(this._currentSelection);
                 host.insertContentAtFocusPoint(value);
             }
@@ -388,14 +389,15 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             first = 0,
             second = 0,
             tagStart,
-            tagEnd;
+            tagEnd,
+            newString = '';
 
         tagStart = incoming.indexOf('<font');
         tagEnd = incoming.indexOf('>', tagStart);
 
         // Get rid of pesky spaces and line breaks.
         // Only for comparison.
-        noBreaks = current.replace(/\s+g/, '');
+        noBreaks = current.replace(/\s+/g, '');
         noBreaks = noBreaks.replace(/(\r\n|\n|\r)/gm,"");
         // This only ever happens in LibreOffice, so specific reference.
         face = text.indexOf('face="');
