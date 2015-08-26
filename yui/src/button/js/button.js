@@ -305,14 +305,17 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
                 } else if(text.substring(first, last+7) === '<o:p></o:p>'
                         || text.substring(first + 1, first + 6) === '/font') {
                     // Weird thing word does for end of line, skip it.
-                    output = output;
                     text = text.substring(last+1, text.length);
                 } else if(text.substring(first + 1, first + 5) === 'font') {
                     // Woaw, found a weird font tag, must be Libre.
-                    output = this._handleFont(text.substring(first, last+1), output, text, origin);
-                    text = text.substring(text.indexOf('</font>') + 7, text.length);
+                    var fontArray = this._handleFont(text.substring(first, last+1), output, text, origin);
+                    output = fontArray[0];
+                    text = fontArray[1];
+                } else if(text.substring(first + 1, first + 6) === 'style') {
+                    // You're probably coming from Libre, aren't you?
+                    text = text.substring(text.indexOf('</style>') + 8, text.length);
                 } else {
-                    // It's a tag we want to handle, so let's handle it.
+                    // It's a tag (not inline style) we want to handle, so let's handle it.
                     output += this._handleTags(text.substring(first, last+1), origin);
                     text = text.substring(last+1, text.length);
                 }
@@ -381,71 +384,89 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
      * @param String origin From where the text was pasted
      * @return String Formatted text
      */
-     _handleFont: function(text, current, incoming, origin) {
-        var output = '',
+     _handleFont: function(tag, current, text, origin) {
+        var outputStyle = '',
+            outputText = '',
             face,
             styleStart,
             noBreaks,
-            first = 0,
-            second = 0,
-            tagStart,
-            tagEnd,
-            newString = '';
-
-        tagStart = incoming.indexOf('<font');
-        tagEnd = incoming.indexOf('>', tagStart);
+            tagStart = 0,
+            tagEnd = tag.length - 1,
+            newString = '',
+            fontOpenCount = 0,
+            fontCloseCount = 0,
+            outputArray = ['', ''];
 
         // Get rid of pesky spaces and line breaks.
         // Only for comparison.
         noBreaks = current.replace(/\s+/g, '');
         noBreaks = noBreaks.replace(/(\r\n|\n|\r)/gm,"");
         // This only ever happens in LibreOffice, so specific reference.
-        face = text.indexOf('face="');
-        styleStart = text.indexOf('style="');
+        face = tag.indexOf('face="');
+        styleStart = tag.indexOf('style="');
 
         // Check to see if the tag has style within it, handle appropriately.
         if(styleStart !== -1) {
-            output += this._handleStyle(text.substring(styleStart + 7, text.indexOf('"', styleStart + 7)), origin);
+            outputStyle += this._handleStyle(text.substring(styleStart + 7, text.indexOf('"', styleStart + 7)), origin);
         }
 
         // If there is styling AND font-face, add semicolon between styles.
         if(styleStart !== -1 && face !== -1) {
-            output += ';';
+            outputStyle += ';';
         }
 
         // If there is font-face in the tag, add it to the styling to be output.
         if(face !== -1) {
-            output += 'font-family:' + text.substring(face + 6, text.indexOf('"', face + 7));
+            outputStyle += 'font-family:' + text.substring(face + 6, text.indexOf('"', face + 7));
+        }
+
+        if(text.indexOf('<font', tagStart + 1) === -1 || text.indexOf('</font>') < text.indexOf('<font', tagStart + 1)) {
+            outputText = this._findTags(text.substring(tagEnd + 1, text.indexOf('</font>')), origin);
+            outputArray[1] = text.substring(text.indexOf('</font>') + 7, text.length);
+        } else {
+            var iterate = 0,
+                openIndex = -1,
+                closeIndex = -1;
+            while (true) {
+                openIndex = text.indexOf('<font', iterate);
+                closeIndex = text.indexOf('</font>', iterate);
+                if (openIndex === -1) {
+                    fontCloseCount = fontCloseCount + 1;
+                    iterate = closeIndex + 1;
+                } else if (closeIndex === -1) {
+                    fontOpenCount = fontOpenCount + 1;
+                    iterate = openIndex + 1;
+                } else if (openIndex < closeIndex) {
+                    fontOpenCount = fontOpenCount + 1;
+                    iterate = openIndex + 1;
+                } else {
+                    fontCloseCount = fontCloseCount + 1;
+                    iterate = closeIndex + 1;
+                }
+                if(fontOpenCount === fontCloseCount) {
+                    break;
+                }
+            }
+
+            outputText = this._findTags(text.substring(text.indexOf('<font') + 7, text.indexOf('</font>', iterate)), origin);
+            outputArray[1] = text.substring(text.indexOf('</font>', iterate), text.length);
         }
 
         // See if previous tag has a style attribute.
         if(noBreaks[noBreaks.length-1] !== '>') {
-            // Something's weird, let's alert the user and step out of this.
-            current = '<span style="' + output + '">' + incoming.substring(tagEnd + 1, incoming.indexOf('</font>')) + '</span>';
-            return current;
-        } else if(noBreaks[noBreaks.length-2] !== '"') {
+            outputArray[0] = current + '<span style="' + outputStyle + '">' + outputText + '</span>';
+            return outputArray;
+        } else if(noBreaks.substring(noBreaks.length - 2, noBreaks.length) !== '">') {
             // Empty tag preceeding, add as style.
-            while(true) {
-                first = current.indexOf('>', second + 1);
-                second = current.indexOf('>', first + 1);
-                if(second === -1) {
-                    break;
-                }
-            }
-            newString = current.substring(0, first) + ' style="' + output + '">';
-        } else if(noBreaks[noBreaks.length-2] === '"') {
+            newString = current.substring(0, current.lastIndexOf('>')) + ' style="' + outputStyle + '">' + outputText;
+        } else if(noBreaks.substring(noBreaks.length - 2, noBreaks.length) === '">') {
             // Found a previous style, let's compound on it.
-            while(true) {
-                first = current.indexOf('">', second + 1);
-                second = current.indexOf('">', first + 1);
-                if(second === -1) {
-                    break;
-                }
-            }
-            newString = current.substring(0, first) + ';' + output + '">';
+            newString = current.substring(0, current.lastIndexOf('>')) + ';' + outputStyle + '">' + outputText;
         }
 
-        return newString;
+        outputArray[0] = newString;
+
+        return outputArray;
     },
 
     /**
@@ -558,10 +579,8 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
      */
     _cleanOutput: function(text) {
         var span,
-            badSpan,
             front,
-            end,
-            toBreak;
+            end;
 
         while(true) {
             // Remove all spans without style.
@@ -572,24 +591,6 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
                 end.replace('</span>', '');
                 text = front + end;
             } else {
-                toBreak = true;
-            }
-            // Any <tag><span style="">text</span></tag>
-            // will become <tag style=""></tag>.
-            badSpan = text.indexOf('><span');
-            if (text.substring(badSpan - 6, 7) !== '</span>') {
-                front = text.substring(0, badSpan);
-                end = text.substring(badSpan + 6, text.length);
-                end = end.replace('</span>', '');
-                if(front[front.length-1] === '"'
-                    && end.substring(0, 8) === ' style="') {
-                    text = front.substring(0, front.length-1) + end.substring(8, end.length);
-                    toBreak = false;
-                } else {
-                    text = front + end;
-                }
-            }
-            if(toBreak) {
                 break;
             }
         }
