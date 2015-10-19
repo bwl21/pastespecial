@@ -407,13 +407,10 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         var outputStyle = '',
             outputText = '',
             face,
-            styleStart,
+            color,
             noBreaks,
-            tagStart = 0,
             tagEnd = tag.length - 1,
             newString = '',
-            fontOpenCount = 0,
-            fontCloseCount = 0,
             outputArray = ['', ''];
 
         // Get rid of pesky spaces and line breaks.
@@ -422,54 +419,33 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         noBreaks = noBreaks.replace(/(\r\n|\n|\r)/gm,"");
         // This only ever happens in LibreOffice, so specific reference.
         face = tag.indexOf('face="');
-        styleStart = tag.indexOf('style="');
+        color = tag.indexOf('color="');
 
         // Check to see if the tag has style within it, handle appropriately.
-        if(styleStart !== -1) {
-            outputStyle += this._handleStyle(text.substring(styleStart + 7, text.indexOf('"', styleStart + 7)), origin);
-        }
-
-        // If there is styling AND font-face, add semicolon between styles.
-        if(styleStart !== -1 && face !== -1) {
-            outputStyle += ';';
+        if(color !== -1) {
+            outputStyle = 'color:' + text.substring(color + 7, text.indexOf('"', color + 8));
         }
 
         // If there is font-face in the tag, add it to the styling to be output.
         if(face !== -1) {
-            outputStyle += 'font-family:' + text.substring(face + 6, text.indexOf('"', face + 7));
+            outputStyle = 'font-family:' + text.substring(face + 6, text.indexOf('"', face + 7));
         }
 
-        if(text.indexOf('<font', tagStart + 1) === -1 || text.indexOf('</font>') < text.indexOf('<font', tagStart + 1)) {
-            outputText = this._findTags(text.substring(tagEnd + 1, text.indexOf('</font>')), origin);
-            outputArray[1] = text.substring(text.indexOf('</font>') + 7, text.length);
-        } else {
-            var iterate = 0,
-                openIndex = -1,
-                closeIndex = -1;
-            while (true) {
-                openIndex = text.indexOf('<font', iterate);
-                closeIndex = text.indexOf('</font>', iterate);
-                if (openIndex === -1) {
-                    fontCloseCount = fontCloseCount + 1;
-                    iterate = closeIndex + 1;
-                } else if (closeIndex === -1) {
-                    fontOpenCount = fontOpenCount + 1;
-                    iterate = openIndex + 1;
-                } else if (openIndex < closeIndex) {
-                    fontOpenCount = fontOpenCount + 1;
-                    iterate = openIndex + 1;
-                } else {
-                    fontCloseCount = fontCloseCount + 1;
-                    iterate = closeIndex + 1;
-                }
-                if(fontOpenCount === fontCloseCount) {
-                    break;
-                }
+        var multiFont = text.substring(tagEnd + 1, text.indexOf('</font>')),
+            multiFontEnd = text.substring(text.indexOf('</font>'), text.length),
+            iterate = -1;
+        while (true) {
+            if (multiFont.indexOf('<font', iterate + 1) !== -1) {
+                multiFont = multiFont + multiFontEnd.substring(0, multiFontEnd.indexOf('</font>') + 7);
+                multiFontEnd = multiFontEnd.substring(multiFontEnd.indexOf('</font>') + 7, multiFontEnd.length);
+                iterate = multiFont.indexOf('<font', iterate);
+            } else {
+                break;
             }
-
-            outputText = this._findTags(text.substring(text.indexOf('<font') + 7, text.indexOf('</font>', iterate)), origin);
-            outputArray[1] = text.substring(text.indexOf('</font>', iterate), text.length);
         }
+
+        outputText = this._findTags(multiFont, origin);
+        outputArray[1] = multiFontEnd;
 
         // See if previous tag has a style attribute.
         if(noBreaks[noBreaks.length-1] !== '>') {
