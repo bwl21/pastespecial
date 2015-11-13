@@ -199,6 +199,8 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         // Obtain the pasted content.
         value = this._iframe.getHTML();
 
+        value = this._cleanWord(value);
+
         value = this._cleanSafari(value);
 
         // Figure out which option is checked.
@@ -276,6 +278,52 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         return this._findTags(text, 'gdoc');
     },
 
+    /**
+     * Cleans the bullet points created in Word by comments
+     *
+     * @method _cleanWord
+     * @param String text The text pasted into the iframe
+     * @return String cleaned text
+     */
+    _cleanWord: function(text) {
+        var front = '',
+            mid = '',
+            end = '',
+            tag = '',
+            list = '';
+        if(text.indexOf('MsoList') !== -1) {
+            tag = text.substring(0, text.indexOf('>', text.indexOf('MsoList')));
+            tag = tag.substring(tag.lastIndexOf('<'), tag.length);
+            front = text.substring(0, text.indexOf(tag));
+            mid = text.substring(text.indexOf('<!--[endif]-->') + 14, text.indexOf('<o:p></o:p>', text.indexOf('<!--[endif]-->')));
+            list = text.substring(text.indexOf(tag), text.indexOf(mid));
+            end = text.substring(text.indexOf('<o:p></o:p>', text.indexOf('<!--[endif]-->')) + 11, text.length);
+            if(tag.indexOf('First') !== -1) {
+                if(list.indexOf('Wingdings') !== -1 || list.indexOf('Symbol') !== -1) {
+                    text = this._cleanWord(front + '<ul>' + '<li>' + mid + '</li>' + end);
+                } else {
+                    text = this._cleanWord(front + '<ol>' + '<li>' + mid + '</li>' + end);
+                }
+            } else if (tag.indexOf('Middle') !== -1) {
+                text = this._cleanWord(front + '<li>' + mid + '</li>' + end);
+            } else if (tag.indexOf('Last') !== -1) {
+                if(list.indexOf('Wingdings') !== -1 || list.indexOf('Symbol') !== -1) {
+                    text = this._cleanWord(front + '<li>' + mid + '</li></ul>' + end);
+                } else {
+                    text = this._cleanWord(front + '<li>' + mid + '</li></ol>' + end);
+                }
+            }
+        }
+        return text;
+    },
+
+    /**
+     * Cleans the fragmented text from Safari pasting
+     *
+     * @method _cleanSafari
+     * @param String text The text pasted into the iframe
+     * @return String cleaned text
+     */
     _cleanSafari: function(text) {
         if(text.indexOf('<!--EndFragment-->') !== -1) {
             text = text.substring(0, text.indexOf('<!--EndFragment-->'));
