@@ -196,21 +196,20 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             focusAfterHide: null
         }).hide();
 
+        // Figure out which option is checked.
+        checked = Y.one('input[name=from]:checked');
+
         // Obtain the pasted content.
         value = this._iframe.getHTML();
 
-        var count = (value.match(/MsoList/g) || []).length;
-        // Errors can be thrown if the function is recursive, but what about here?
-        for (var i=0; i<count; i++) {
+        if (checked.hasClass(CSS.PASTEFROMWORD)) {
             value = this._cleanWord(value);
         }
 
-        if(value.indexOf('<!--EndFragment-->') !== -1) {
-            value = this._cleanSafari(value);
-        }
-
-        // Figure out which option is checked.
-        checked = Y.one('input[name=from]:checked');
+        // Remove nasty browser/generator specific stuffs
+        value = value.replace(/<!(.|[\n\r])*?supportFields(.|[\n\r])*?-->/g,'');
+        value = value.replace(/<!(.|[\n\r])*?support(.|[\n\r])*?-->/g,'');
+        value = value.replace(/<!--(.|[\n\r])*?<!\[endif\]-->/g,'');
 
         // If they put something in there, let's handle it based on where it's from.
         if (value !== '') {
@@ -296,28 +295,42 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             mid = '',
             end = '',
             tag = '',
+            poshelper1,
+            poshelper2,
+            poshelper3,
+            pos,
+            reg = />[^<\n\r].*/gi,
             list = '';
-        tag = text.substring(0, text.indexOf('>', text.indexOf('MsoList')));
-        tag = tag.substring(tag.lastIndexOf('<'), tag.length);
-        front = text.substring(0, text.indexOf(tag));
-        mid = text.substring(text.indexOf('<!--[endif]-->') + 14, text.indexOf('</p>',
-            text.indexOf('<!--[endif]-->')));
-        list = text.substring(text.indexOf(tag), text.indexOf(mid));
-        end = text.substring(text.indexOf('<o:p></o:p>', text.indexOf('<!--[endif]-->')) + 11, text.length);
-        end = end.replace('</p>', '');
-        if(tag.indexOf('First') !== -1) {
-            if(list.indexOf('Wingdings') !== -1 || list.indexOf('Symbol') !== -1) {
-                text = front + '<ul>' + '<li>' + mid + '</li>' + end;
-            } else {
-                text = front + '<ol>' + '<li>' + mid + '</li>' + end;
-            }
-        } else if (tag.indexOf('Middle') !== -1) {
-            text = front + '<li>' + mid + '</li>' + end;
-        } else if (tag.indexOf('Last') !== -1) {
-            if(list.indexOf('Wingdings') !== -1 || list.indexOf('Symbol') !== -1) {
-                text = front + '<li>' + mid + '</li></ul>' + end;
-            } else {
-                text = front + '<li>' + mid + '</li></ol>' + end;
+        var count = (text.match(/MsoList/g) || []).length;
+        // Errors can be thrown if the function is recursive, but what about here?
+        for (var i=0; i<count; i++) {
+            tag = text.substring(text.indexOf('MsoList') - 10, text.length);
+            tag = tag.substring(tag.indexOf('<'), tag.length);
+            tag = tag.substring(0, tag.indexOf('>'));
+            front = text.substring(0, text.indexOf(tag));
+            poshelper1 = text.indexOf('&nbsp;', text.indexOf(tag)) + 1;
+            poshelper2 = text.substring(poshelper1, text.length);
+            poshelper3 = reg.exec(poshelper2);
+            pos = text.indexOf(poshelper3);
+            reg.lastIndex = 1;
+            mid = text.substring(pos + 1, text.indexOf('</p>', pos));
+            list = text.substring(text.indexOf(tag), text.indexOf(mid));
+            end = text.substring(text.indexOf('</p>', text.indexOf(mid)) + 4, text.length);
+            mid = mid.replace('<o:p></o:p>', '');
+            if(tag.indexOf('First') !== -1) {
+                if(list.indexOf('Wingdings') !== -1 || list.indexOf('Symbol') !== -1) {
+                    text = front + '<ul>' + '<li>' + mid + '</li>' + end;
+                } else {
+                    text = front + '<ol>' + '<li>' + mid + '</li>' + end;
+                }
+            } else if (tag.indexOf('Middle') !== -1) {
+                text = front + '<li>' + mid + '</li>' + end;
+            } else if (tag.indexOf('Last') !== -1) {
+                if(list.indexOf('Wingdings') !== -1 || list.indexOf('Symbol') !== -1) {
+                    text = front + '<li>' + mid + '</li></ul>' + end;
+                } else {
+                    text = front + '<li>' + mid + '</li></ol>' + end;
+                }
             }
         }
         return text;
@@ -591,6 +604,9 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         if(styles !== '') {
             styles = ' style="' + styles + '"';
         }
+
+        // Close it all out.
+        output += '>';
 
         return output;
     },
