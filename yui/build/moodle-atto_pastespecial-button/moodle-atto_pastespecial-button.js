@@ -314,23 +314,28 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             poshelper2 = text.substring(poshelper1, text.length);
             poshelper3 = reg.exec(poshelper2);
             pos = text.indexOf(poshelper3);
-            reg.lastIndex = 0;
+            reg.lastIndex = 1;
             mid = text.substring(pos + 1, text.indexOf('</p>', pos));
             list = text.substring(text.indexOf(tag), text.indexOf(mid));
             end = text.substring(text.indexOf('</p>', text.indexOf(mid)) + 4, text.length);
             mid = mid.replace('<o:p></o:p>', '');
             if(tag.indexOf('First') !== -1) {
                 if(list.indexOf('Wingdings') !== -1 || list.indexOf('Symbol') !== -1) {
+                    console.log('Opening unordered list: ' + mid);
                     text = front + '<ul>' + '<li>' + mid + '</li>' + end;
                 } else {
+                    console.log('Opening ordered list: ' + mid);
                     text = front + '<ol>' + '<li>' + mid + '</li>' + end;
                 }
             } else if (tag.indexOf('Middle') !== -1) {
+                console.log('Stnadard list item: ' + mid);
                 text = front + '<li>' + mid + '</li>' + end;
             } else if (tag.indexOf('Last') !== -1) {
                 if(list.indexOf('Wingdings') !== -1 || list.indexOf('Symbol') !== -1) {
+                    console.log('Closing unordered list: ' + mid);
                     text = front + '<li>' + mid + '</li></ul>' + end;
                 } else {
+                    console.log('Closing ordered list: ' + mid);
                     text = front + '<li>' + mid + '</li></ol>' + end;
                 }
             }

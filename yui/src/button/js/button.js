@@ -319,16 +319,21 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             mid = mid.replace('<o:p></o:p>', '');
             if(tag.indexOf('First') !== -1) {
                 if(list.indexOf('Wingdings') !== -1 || list.indexOf('Symbol') !== -1) {
+                    console.log('Opening unordered list: ' + mid);
                     text = front + '<ul>' + '<li>' + mid + '</li>' + end;
                 } else {
+                    console.log('Opening ordered list: ' + mid);
                     text = front + '<ol>' + '<li>' + mid + '</li>' + end;
                 }
             } else if (tag.indexOf('Middle') !== -1) {
+                console.log('Stnadard list item: ' + mid);
                 text = front + '<li>' + mid + '</li>' + end;
             } else if (tag.indexOf('Last') !== -1) {
                 if(list.indexOf('Wingdings') !== -1 || list.indexOf('Symbol') !== -1) {
+                    console.log('Closing unordered list: ' + mid);
                     text = front + '<li>' + mid + '</li></ul>' + end;
                 } else {
+                    console.log('Closing ordered list: ' + mid);
                     text = front + '<li>' + mid + '</li></ol>' + end;
                 }
             }
