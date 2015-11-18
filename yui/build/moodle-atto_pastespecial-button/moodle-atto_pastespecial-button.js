@@ -530,18 +530,15 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         var tag = text.substring(1, text.indexOf(' ')),
             styleStart,
             styleEnd,
-            additional = '',
+            align,
+            href,
+            additional = [],
             output = '',
             styles = '';
 
         // If there are no spaces in the tag, it's a plain tag.
         if(text.indexOf(' ') === -1) {
             tag = text.substring(1, text.indexOf('>'));
-        }
-
-        // Weird hack for Microsoft Word.
-        if(origin === 'word' && tag.substring(0, 3) === '!--') {
-            return '';
         }
 
         // Let's see if there are any styles.
@@ -552,10 +549,11 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         }
 
         // Anything else?
-        if(text.indexOf(' ') !== -1) {
-            additional = text.substring(text.indexOf(' '), text.length-1);
-            additional = this._handleAdditional(additional);
-        }
+        align = text.match(/align=".*?"/g);
+        href = text.match(/href="[^#].*?"/g);
+        additional.align = align;
+        additional.href = href;
+
         if(text.substring(0, 2) === '</') {
             // Closing tags have nothing we need to handle.
             // Close the tag and be done.
@@ -578,43 +576,22 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             output += '<i';
         } else if(tag === 'u') {
             output += '<u';
+        } else if(tag === 'a') {
+            output += '<a';
         } else {
             // What's the worst that could happen? Let's go with <p>.
             output += '<p';
         }
 
+        if (additional.href) {
+            output += ' ' + additional.href;
+        }
+        if (additional.align) {
+            output += ' ' + additional.align;
+        }
         // Add spaces in from of styling information if present.
         if(styles !== '') {
             styles = ' style="' + styles + '"';
-        }
-        if(additional !== '') {
-            additional = ' ' + additional;
-        }
-
-        // Put it ALL together.
-        output += additional + styles + '>';
-
-        return output;
-    },
-
-    /**
-     * Handle additional information in the HTML tags
-     *
-     * @param String text The additional information within the tag
-     * @return String formatted and handled version of the string
-     */
-    _handleAdditional: function(text) {
-        // Only handling:
-        // align
-        var output = '',
-            start,
-            end;
-
-        start = text.indexOf('align="');
-        end = text.indexOf('"', start + 8);
-
-        if(start !== -1) {
-            output = text.substring(start, end + 1);
         }
 
         return output;
