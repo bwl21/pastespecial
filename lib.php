@@ -55,6 +55,7 @@ function atto_pastespecial_params_for_js($elementid, $options, $fpoptions) {
     $params = array('wordCSS' => get_config('atto_pastespecial', 'wordCSS'),
                     'gdocCSS' => get_config('atto_pastespecial', 'gdocCSS'),
                     'libreCSS' => get_config('atto_pastespecial', 'libreCSS'),
-                    'otherCSS' => get_config('atto_pastespecial', 'otherCSS'));
+                    'otherCSS' => get_config('atto_pastespecial', 'otherCSS'),
+                    'setDefault' => (bool) get_config('atto_pastespecial', 'default'));
     return $params;
 }

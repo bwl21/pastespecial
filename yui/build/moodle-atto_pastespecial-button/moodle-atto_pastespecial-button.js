@@ -150,6 +150,15 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             icon: 'e/paste',
             callback: this._displayDialogue
         });
+
+        if (params.setDefault) {
+            this.editor.on('key', function(e) {
+                if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
+                    this._displayDialogue();
+                    this._content.one('.atto_pastespecial_pastefromother').set('checked', true);
+                }
+            }, 'down:86', this);
+        }
     },
 
     /**
@@ -174,6 +183,9 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
 
         // Show the dialogue.
         dialogue.show();
+
+        // Set the click handler for the submit button.
+        this._content.one('.submit').on('click', this._pasteContent, this);
 
         // Set the iframe target for later use.
         this._iframe = Y.one(SELECTORS.IFRAME);
@@ -257,9 +269,6 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             component: COMPONENTNAME,
             CSS: CSS
         }));
-
-        // Set the click handler for the submit button.
-        this._content.one('.submit').on('click', this._pasteContent, this);
 
         // Return the HTML of the dialogue box.
         return this._content;

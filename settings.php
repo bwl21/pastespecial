@@ -82,4 +82,15 @@ if ($ADMIN->fulltree) {
                                               '50',
                                               '10');
     $settings->add($setting);
+
+    // Set whether or not we handle pasting
+    $name = new lang_string('default', 'atto_pastespecial');
+    $desc = new lang_string('default_desc', 'atto_pastespecial');
+    $default = 0;
+
+    $setting = new admin_setting_configcheckbox('atto_pastespecial/default',
+                                                $name,
+                                                $desc,
+                                                $default);
+    $settings->add($setting);
 }

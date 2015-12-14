@@ -42,3 +42,5 @@ $string['otherCSS'] = 'Other CSS properties';
 $string['wordCSS_default'] = 'font-family,font-size,background,color,background-color';
 $string['gdocCSS_default'] = 'background-color,color,font-family,font-size,font-weight,font-style,text-decoration,list-style-type,text-align';
 $string['libreCSS_default'] = 'background,color,font-size';
+$string['default'] = 'Set as default';
+$string['default_desc'] = 'Set this plugin to handle pasting by keyboard instead of automatically pasting';
