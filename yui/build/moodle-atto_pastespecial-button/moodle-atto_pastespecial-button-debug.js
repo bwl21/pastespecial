@@ -701,6 +701,7 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
 
         // Start it all off with a clean p tag
         raw = '';
+        text = text.replace(/<{1}\/{0,1}(?:[ibus]|(?:sub)|(?:sup)|(?:span)){1}.*?>{1}/g,'');
 
         while(true) {
             first = text.indexOf('<');
@@ -713,10 +714,7 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             } else if(last < second || second === -1) {
                 // We found a tag, what's inside?
                 raw += text.substring(0, first);
-                if(text.substring(first, first+5) === '<span' ||
-                   text.substring(first, first+6) === '</span') {
-                    raw = raw;
-                } else if(text.substring(first, first+4) === '</p>' &&
+                if(text.substring(first, first+4) === '</p>' &&
                         raw.substring(raw.length-4, raw.length) !== '</p>') {
                     // Let's close out the </p>
                     raw += '</p>';
