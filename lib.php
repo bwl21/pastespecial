@@ -34,6 +34,7 @@ function atto_pastespecial_strings_for_js() {
     global $PAGE;
 
     $PAGE->requires->strings_for_js(array('pastehere',
+                                          'pasteview',
                                           'pastefromword',
                                           'pastefromgdoc',
                                           'pastefromlibre',

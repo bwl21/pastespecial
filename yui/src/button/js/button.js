@@ -39,7 +39,8 @@ var COMPONENTNAME = 'atto_pastespecial',
         PASTEFROMLIBRE: 'atto_pastespecial_pastefromlibre',
         PASTEFROMOTHER: 'atto_pastespecial_pastefromother',
         PASTEUNFORMATTED: 'atto_pastespecial_pasteunformatted',
-        IFRAME: 'atto_pastespecial_iframe'
+        IFRAME: 'atto_pastespecial_iframe',
+        IFRAME_VIEW: 'atto_pastespecial_iframe_view'
     },
     SELECTORS = {
         PASTEAREA: '.atto_pastespecial_pastearea',
@@ -49,7 +50,8 @@ var COMPONENTNAME = 'atto_pastespecial',
         PASTEFROMOTHER: '.atto_pastespecial_pastefromother',
         PASTEUNFORMATTED: '.atto_pastespecial_pasteunformatted',
         IFRAME: '.atto_pastespecial_iframe',
-        IFRAMEID: '#atto_pastespecial_iframe'
+        IFRAMEID: '#atto_pastespecial_iframe',
+        IFRAME_VIEW: '.atto_pastespecial_iframe_view'
     },
     STYLES = {
         GDOC: ['background-color',
@@ -72,11 +74,20 @@ var COMPONENTNAME = 'atto_pastespecial',
     },
     TEMPLATE = '' +
         '<form class="atto_form">' +
-            '<div>' +
-            '{{get_string "pastehere" component}}' +
+            '<div style="display:inline-block;width:50%;">' +
+                '<div>' +
+                    '{{get_string "pastehere" component}}' +
+                '</div>' +
+                '<div id="{{elementid}}_{{CSS.IFRAME}}" class="{{CSS.IFRAME}}" contentEditable="true"' +
+                'style="width:100%;height:400px;overflow-y:scroll;border: 1px solid grey"></div>' +
             '</div>' +
-            '<div id="{{elementid}}_{{CSS.IFRAME}}" class="{{CSS.IFRAME}}" contentEditable="true"' +
-            'style="width:100%;height:200px;overflow-y:scroll;border: 1px solid grey"></div>' +
+            '<div style="display:inline-block;width:50%;">' +
+                '<div>' +
+                    '{{get_string "pasteview" component}}' +
+                '</div>' +
+                '<div id="{{elementid}}_{{CSS.IFRAME_VIEW}}" class="{{CSS.IFRAME_VIEW}}" contentEditable="true"' +
+                'style="width:100%;height:400px;overflow-y:scroll;border: 1px solid grey"></div>' +
+            '</div>' +
             '<input type="radio" class="{{CSS.PASTEFROMWORD}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMWORD}}" checked>' +
             '<label for="{{elementid}}_{{CSS.PASTEFROMWORD}}">{{get_string "pastefromword" component}}</label>' +
             '<br>' +
@@ -170,7 +181,9 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         var dialogue = this.getDialogue({
             headerContent: M.util.get_string('pluginname', COMPONENTNAME),
             focusAfterHide: true,
-            focusOnShowSelector: SELECTORS.PASTEAREA
+            focusOnShowSelector: SELECTORS.PASTEAREA,
+            width: '90%',
+            height: '90%'
         });
 
         // Save the current selection of the editor.
@@ -184,6 +197,8 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
 
         // Set the click handler for the submit button.
         this._content.one('.submit').on('click', this._pasteContent, this);
+        this._content.all('input[type="radio"]').on('click', this._changeContent, this);
+        this._content.one(SELECTORS.IFRAME).on('valuechange', this._changeContent, this);
 
         // Set the iframe target for later use.
         this._iframe = Y.one(SELECTORS.IFRAME);
@@ -191,22 +206,42 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
     },
 
     /**
-     * Handle the pasted information when the user clicks paste
+     * Pastes the content into the editor
      *
      * @method _pasteContent
      * @param e Sent click
      *
      */
     _pasteContent: function(e) {
-        var value,
-            checked,
+        var value = Y.one(SELECTORS.IFRAME_VIEW).getHTML(),
             host = this.get('host');
-
         // Prevent anything else from being done and hide our dialogue.
         e.preventDefault();
         this.getDialogue({
             focusAfterHide: null
         }).hide();
+
+        // If they had not selected anything in the editor, paste the content at their cursor.
+        if(this._currentSelection === false) {
+            this.editor.focus();
+            this.editor.append(value);
+        }
+        // Instead, replace the selected content.
+        else {
+            host.setSelection(this._currentSelection);
+            host.insertContentAtFocusPoint(value);
+        }
+        this.markUpdated();
+    },
+    /**
+     * Handle the pasted information when the user changes view options
+     *
+     * @method _changeContent
+     *
+     */
+    _changeContent: function() {
+        var value,
+            checked;
 
         // Figure out which option is checked.
         checked = Y.one('input[name=from]:checked');
@@ -238,19 +273,9 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             } else {
                 value = this._handleUnformatted(value);
             }
-
-            // If they had not selected anything in the editor, paste the content at their cursor.
-            if(this._currentSelection === false) {
-                this.editor.focus();
-                this.editor.append(value);
-            }
-            // Instead, replace the selected content.
-            else {
-                host.setSelection(this._currentSelection);
-                host.insertContentAtFocusPoint(value);
-            }
-            this.markUpdated();
         }
+
+        Y.one(SELECTORS.IFRAME_VIEW).setHTML(value);
     },
 
     /**
@@ -582,6 +607,12 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             output += '<i';
         } else if(tag === 'u') {
             output += '<u';
+        } else if(tag === 's') {
+            output += '<s';
+        } else if(tag === 'sup') {
+            output += '<sup';
+        } else if(tag === 'sub') {
+            output += '<sub';
         } else if(tag === 'a') {
             output += '<a';
         } else {
@@ -708,7 +739,7 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
 
         // Start it all off with a clean p tag
         raw = '';
-        text = text.replace(/<{1}\/{0,1}(?:[ibus]|(?:sub)|(?:sup)|(?:span)){1}.*?>{1}/g,'');
+        text = text.replace(/<{1}\/{0,1}(?:[ibus]|(?:sub)|(?:sup)|(?:span)){1}(?:.|\r|\n)*?>{1}/g,'');
 
         while(true) {
             first = text.indexOf('<');

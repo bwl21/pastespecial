@@ -44,3 +44,4 @@ $string['gdocCSS_default'] = 'background-color,color,font-family,font-size,font-
 $string['libreCSS_default'] = 'background,color,font-size';
 $string['default'] = 'Set as default';
 $string['default_desc'] = 'Set this plugin to handle pasting by keyboard instead of automatically pasting';
+$string['pasteview'] = 'Preview:';
