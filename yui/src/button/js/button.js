@@ -75,16 +75,16 @@ var COMPONENTNAME = 'atto_pastespecial',
     TEMPLATE = '' +
         '<form class="atto_form">' +
             '<div style="display:inline-block;width:50%;">' +
-                '<div>' +
+                '<label for="{{elementid}}_{{CSS.IFRAME}}">' +
                     '{{get_string "pastehere" component}}' +
-                '</div>' +
+                '</label>' +
                 '<div id="{{elementid}}_{{CSS.IFRAME}}" class="{{CSS.IFRAME}}" contentEditable="true"' +
                 'style="width:100%;height:400px;overflow-y:scroll;border: 1px solid grey"></div>' +
             '</div>' +
             '<div style="display:inline-block;width:50%;">' +
-                '<div>' +
+                '<label for="{{elementid}}_{{CSS.IFRAME_VIEW}}">' +
                     '{{get_string "pasteview" component}}' +
-                '</div>' +
+                '</label>' +
                 '<div id="{{elementid}}_{{CSS.IFRAME_VIEW}}" class="{{CSS.IFRAME_VIEW}}" contentEditable="true"' +
                 'style="width:100%;height:400px;overflow-y:scroll;border: 1px solid grey"></div>' +
             '</div>' +
@@ -104,7 +104,7 @@ var COMPONENTNAME = 'atto_pastespecial',
             '<label for="{{elementid}}_{{CSS.PASTEUNFORMATTED}}">{{get_string "pasteunformatted" component}}</label>' +
             '<div class="mdl-align">' +
                 '<br>' +
-                '<button type="submit" class="submit">{{get_string "paste" component}}</button>' +
+                '<button value="Paste" type="submit" class="submit">{{get_string "paste" component}}</button>' +
             '</div>' +
         '</form>';
 Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_atto.EditorPlugin, [], {
@@ -256,7 +256,7 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         // Remove nasty browser/generator specific stuffs
         value = value.replace(/<!--StartFragment-->/g,'');
         value = value.replace(/<!--EndFragment-->/g,'');
-        value = value.replace(/<!(.)*?support(.|[\n\r])*?-->/g,'');
+        value = value.replace(/<!--\[if support(.|[\n\r])*?-->/g,'');
         value = value.replace(/<!--(.|[\n\r])*?<!\[endif\]-->/g,'');
         value = value.replace(/<!--\[endif\]-->/g,'');
 
