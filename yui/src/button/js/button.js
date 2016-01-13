@@ -748,6 +748,7 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             if(first === -1
                 || last === -1) {
                 // We found no tags, let's step out
+                raw += text;
                 break;
             } else if(last < second || second === -1) {
                 // We found a tag, what's inside?
