@@ -1,5 +1,6 @@
 Version 2016xxxx00:
 Further improved unformatted to handle no tags
+Added German Language file
 
 Version 2016010600:
 Updated unformatted to better handle inline styling
