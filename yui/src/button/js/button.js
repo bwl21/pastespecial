@@ -39,6 +39,7 @@ var COMPONENTNAME = 'atto_pastespecial',
         PASTEFROMLIBRE: 'atto_pastespecial_pastefromlibre',
         PASTEFROMOTHER: 'atto_pastespecial_pastefromother',
         PASTEUNFORMATTED: 'atto_pastespecial_pasteunformatted',
+        PASTESTRAIGHT: 'atto_pastespecial_pastestraight',
         IFRAME: 'atto_pastespecial_iframe',
         IFRAME_VIEW: 'atto_pastespecial_iframe_view'
     },
@@ -49,6 +50,7 @@ var COMPONENTNAME = 'atto_pastespecial',
         PASTEFROMLIBRE: '.atto_pastespecial_pastefromlibre',
         PASTEFROMOTHER: '.atto_pastespecial_pastefromother',
         PASTEUNFORMATTED: '.atto_pastespecial_pasteunformatted',
+        PASTESTRAIGHT: '.atto_pastespecial_pastestraight',
         IFRAME: '.atto_pastespecial_iframe',
         IFRAMEID: '#atto_pastespecial_iframe',
         IFRAME_VIEW: '.atto_pastespecial_iframe_view'
@@ -102,6 +104,11 @@ var COMPONENTNAME = 'atto_pastespecial',
             '<br>' +
             '<input type="radio" class="{{CSS.PASTEUNFORMATTED}}" name="from" id="{{elementid}}_{{CSS.PASTEUNFORMATTED}}"/>' +
             '<label for="{{elementid}}_{{CSS.PASTEUNFORMATTED}}">{{get_string "pasteunformatted" component}}</label>' +
+            '{{#if straight}}' +
+                '<br>' +
+                '<input type="radio" class="{{CSS.PASTESTRAIGHT}}" name="from" id="{{elementid}}_{{CSS.PASTESTRAIGHT}}"/>' +
+                '<label for="{{elementid}}_{{CSS.PASTESTRAIGHT}}">{{get_string "pastestraight" component}}</label>' +
+            '{{/if}}' +
             '<div class="mdl-align">' +
                 '<br>' +
                 '<button value="Paste" type="submit" class="submit">{{get_string "paste" component}}</button>' +
@@ -126,6 +133,9 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
 
     // Will be a string that contains the CSS properties to be used with Other
     _otherStyle: null,
+
+    // Will be a boolean whether or not we allow straight pasting
+    _straight: null,
 
     // Will point to and hold the current selection when we handle pasting.
     _currentSelection: null,
@@ -152,6 +162,9 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             this._otherStyle = params.otherCSS.split(',');
         } else {
             this._otherStyle = this._gdocStyle + this._wordStyle + this._libreStyle;
+        }
+        if(params.straight) {
+            this._straight = params.straight;
         }
 
         // Add the button
@@ -249,32 +262,33 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         // Obtain the pasted content.
         value = this._iframe.getHTML();
 
-        if (checked.hasClass(CSS.PASTEFROMWORD)) {
-            value = this._cleanWord(value);
-        }
+        if (!checked.hasClass(CSS.PASTESTRAIGHT)) {
+            if (checked.hasClass(CSS.PASTEFROMWORD)) {
+                value = this._cleanWord(value);
+            }
 
-        // Remove nasty browser/generator specific stuffs
-        value = value.replace(/<!--StartFragment-->/g,'');
-        value = value.replace(/<!--EndFragment-->/g,'');
-        value = value.replace(/<!--\[if support(.|[\n\r])*?-->/g,'');
-        value = value.replace(/<!--(.|[\n\r])*?<!\[endif\]-->/g,'');
-        value = value.replace(/<!--\[endif\]-->/g,'');
+            // Remove nasty browser/generator specific stuffs
+            value = value.replace(/<!--StartFragment-->/g,'');
+            value = value.replace(/<!--EndFragment-->/g,'');
+            value = value.replace(/<!--\[if support(.|[\n\r])*?-->/g,'');
+            value = value.replace(/<!--(.|[\n\r])*?<!\[endif\]-->/g,'');
+            value = value.replace(/<!--\[endif\]-->/g,'');
 
-        // If they put something in there, let's handle it based on where it's from.
-        if (value !== '') {
-            if(checked.hasClass(CSS.PASTEFROMWORD)) {
-                value = this._handleWord(value);
-            } else if(checked.hasClass(CSS.PASTEFROMGDOC)) {
-                value = this._handleGDoc(value);
-            } else if(checked.hasClass(CSS.PASTEFROMLIBRE)) {
-                value = this._handleLibre(value);
-            } else if(checked.hasClass(CSS.PASTEFROMOTHER)) {
-                value = this._handleOther(value);
-            } else {
-                value = this._handleUnformatted(value);
+            // If they put something in there, let's handle it based on where it's from.
+            if (value !== '') {
+                if(checked.hasClass(CSS.PASTEFROMWORD)) {
+                    value = this._handleWord(value);
+                } else if(checked.hasClass(CSS.PASTEFROMGDOC)) {
+                    value = this._handleGDoc(value);
+                } else if(checked.hasClass(CSS.PASTEFROMLIBRE)) {
+                    value = this._handleLibre(value);
+                } else if(checked.hasClass(CSS.PASTEFROMOTHER)) {
+                    value = this._handleOther(value);
+                } else {
+                    value = this._handleUnformatted(value);
+                }
             }
         }
-
         Y.one(SELECTORS.IFRAME_VIEW).setHTML(value);
     },
 
@@ -290,6 +304,7 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         // Set the HTML content.
         this._content = Y.Node.create(template({
             component: COMPONENTNAME,
+            straight: this._straight,
             CSS: CSS
         }));
 

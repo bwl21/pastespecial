@@ -40,6 +40,7 @@ function atto_pastespecial_strings_for_js() {
                                           'pastefromlibre',
                                           'pastefromother',
                                           'pasteunformatted',
+                                          'pastestraight',
                                           'paste'
                                          ), 'atto_pastespecial');
 }
@@ -57,6 +58,7 @@ function atto_pastespecial_params_for_js($elementid, $options, $fpoptions) {
                     'gdocCSS' => get_config('atto_pastespecial', 'gdocCSS'),
                     'libreCSS' => get_config('atto_pastespecial', 'libreCSS'),
                     'otherCSS' => get_config('atto_pastespecial', 'otherCSS'),
+                    'straight' => get_config('atto_pastespecial', 'straight'),
                     'setDefault' => (bool) get_config('atto_pastespecial', 'default'));
     return $params;
 }
