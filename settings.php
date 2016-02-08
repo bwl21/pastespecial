@@ -93,4 +93,15 @@ if ($ADMIN->fulltree) {
                                                 $desc,
                                                 $default);
     $settings->add($setting);
+
+    // Set whether or not we allow straight
+    $name = new lang_string('straight', 'atto_pastespecial');
+    $desc = new lang_string('straight_desc', 'atto_pastespecial');
+    $default = 0;
+
+    $setting = new admin_setting_configcheckbox('atto_pastespecial/straight',
+                                                $name,
+                                                $desc,
+                                                $default);
+    $settings->add($setting);
 }
