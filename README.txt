@@ -1,4 +1,5 @@
 Version 2016xxxx00:
+Further improved UI
 Tables can now be pasted
 Behat added to allow this
 Further improved unformatted to handle no tags

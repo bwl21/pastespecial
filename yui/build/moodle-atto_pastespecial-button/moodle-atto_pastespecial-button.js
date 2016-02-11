@@ -77,41 +77,41 @@ var COMPONENTNAME = 'atto_pastespecial',
                'background-color']
     },
     TEMPLATE = '' +
-        '<form class="atto_form">' +
-            '<div style="display:inline-block;width:50%;">' +
+        '<form class="atto_form atto_pastespecial_form">' +
+            '<div class="atto_pastespecial_contenteditable atto_pastespecial_preview">' +
                 '<label for="{{elementid}}_{{CSS.IFRAME}}">' +
                     '{{get_string "pastehere" component}}' +
                 '</label>' +
-                '<div id="{{elementid}}_{{CSS.IFRAME}}" class="{{CSS.IFRAME}}" contentEditable="true"' +
-                'style="width:100%;height:400px;overflow-y:scroll;border: 1px solid grey"></div>' +
+                '<div id="{{elementid}}_{{CSS.IFRAME}}" class="{{CSS.IFRAME}}" contentEditable="true"></div>' +
             '</div>' +
-            '<div style="display:inline-block;width:50%;">' +
+            '<div class="atto_pastespecial_contenteditable atto_pastespecial_handled">' +
                 '<label for="{{elementid}}_{{CSS.IFRAME_VIEW}}">' +
                     '{{get_string "pasteview" component}}' +
                 '</label>' +
-                '<div id="{{elementid}}_{{CSS.IFRAME_VIEW}}" class="{{CSS.IFRAME_VIEW}}" contentEditable="true"' +
-                'style="width:100%;height:400px;overflow-y:scroll;border: 1px solid grey"></div>' +
+                '<div id="{{elementid}}_{{CSS.IFRAME_VIEW}}" class="{{CSS.IFRAME_VIEW}}" contentEditable="true"></div>' +
             '</div>' +
-            '<input type="radio" class="{{CSS.PASTEFROMWORD}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMWORD}}" checked>' +
-            '<label for="{{elementid}}_{{CSS.PASTEFROMWORD}}">{{get_string "pastefromword" component}}</label>' +
-            '<br>' +
-            '<input type="radio" class="{{CSS.PASTEFROMGDOC}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMGDOC}}"/>' +
-            '<label for="{{elementid}}_{{CSS.PASTEFROMGDOC}}">{{get_string "pastefromgdoc" component}}</label>' +
-            '<br>' +
-            '<input type="radio" class="{{CSS.PASTEFROMLIBRE}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMLIBRE}}"/>' +
-            '<label for="{{elementid}}_{{CSS.PASTEFROMLIBRE}}">{{get_string "pastefromlibre" component}}</label>' +
-            '<br>' +
-            '<input type="radio" class="{{CSS.PASTEFROMOTHER}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMOTHER}}"/>' +
-            '<label for="{{elementid}}_{{CSS.PASTEFROMOTHER}}">{{get_string "pastefromother" component}}</label>' +
-            '<br>' +
-            '<input type="radio" class="{{CSS.PASTEUNFORMATTED}}" name="from" id="{{elementid}}_{{CSS.PASTEUNFORMATTED}}"/>' +
-            '<label for="{{elementid}}_{{CSS.PASTEUNFORMATTED}}">{{get_string "pasteunformatted" component}}</label>' +
-            '{{#if straight}}' +
+            '<div class="atto_pastespecial_radios">' +
+                '<input type="radio" class="{{CSS.PASTEFROMWORD}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMWORD}}" checked>' +
+                '<label for="{{elementid}}_{{CSS.PASTEFROMWORD}}">{{get_string "pastefromword" component}}</label>' +
                 '<br>' +
-                '<input type="radio" class="{{CSS.PASTESTRAIGHT}}" name="from" id="{{elementid}}_{{CSS.PASTESTRAIGHT}}"/>' +
-                '<label for="{{elementid}}_{{CSS.PASTESTRAIGHT}}">{{get_string "pastestraight" component}}</label>' +
-            '{{/if}}' +
-            '<div class="mdl-align">' +
+                '<input type="radio" class="{{CSS.PASTEFROMGDOC}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMGDOC}}"/>' +
+                '<label for="{{elementid}}_{{CSS.PASTEFROMGDOC}}">{{get_string "pastefromgdoc" component}}</label>' +
+                '<br>' +
+                '<input type="radio" class="{{CSS.PASTEFROMLIBRE}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMLIBRE}}"/>' +
+                '<label for="{{elementid}}_{{CSS.PASTEFROMLIBRE}}">{{get_string "pastefromlibre" component}}</label>' +
+                '<br>' +
+                '<input type="radio" class="{{CSS.PASTEFROMOTHER}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMOTHER}}"/>' +
+                '<label for="{{elementid}}_{{CSS.PASTEFROMOTHER}}">{{get_string "pastefromother" component}}</label>' +
+                '<br>' +
+                '<input type="radio" class="{{CSS.PASTEUNFORMATTED}}" name="from" id="{{elementid}}_{{CSS.PASTEUNFORMATTED}}"/>' +
+                '<label for="{{elementid}}_{{CSS.PASTEUNFORMATTED}}">{{get_string "pasteunformatted" component}}</label>' +
+                '{{#if straight}}' +
+                    '<br>' +
+                    '<input type="radio" class="{{CSS.PASTESTRAIGHT}}" name="from" id="{{elementid}}_{{CSS.PASTESTRAIGHT}}"/>' +
+                    '<label for="{{elementid}}_{{CSS.PASTESTRAIGHT}}">{{get_string "pastestraight" component}}</label>' +
+                '{{/if}}' +
+            '</div>' +
+            '<div class="mdl-align atto_pastespecial_button">' +
                 '<br>' +
                 '<button value="Paste" type="submit" class="submit">{{get_string "paste" component}}</button>' +
             '</div>' +
@@ -214,6 +214,7 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         this._content.one('.submit').on('click', this._pasteContent, this);
         this._content.all('input[type="radio"]').on('click', this._changeContent, this);
         this._content.one(SELECTORS.IFRAME).on('valuechange', this._changeContent, this);
+        this._content.ancestor().setStyle('height', '100%');
 
         // Set the iframe target for later use.
         this._iframe = Y.one(SELECTORS.IFRAME);
