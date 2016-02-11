@@ -417,7 +417,10 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             output += text.substring(0, first);
             if(last < second) {
                 // Found the first tag, now what?
-                if(text.substring(first, last+1) === '<br>'
+                if(text.substring(first, first+6) === '<table') {
+                    output += text.substring(first, text.indexOf('</table>') + 8);
+                    text = text.substring(text.indexOf('</table>') + 8, text.length);
+                } else if(text.substring(first, last+1) === '<br>'
                     || text.substring(first, last+13) === '<o:p>&nbsp;</o:p>') {
                     // A nice clean line break.
                     output += '<br>';
@@ -770,29 +773,38 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             } else if(last < second || second === -1) {
                 // We found a tag, what's inside?
                 raw += text.substring(0, first);
-                if(text.substring(first, first+4) === '</p>' &&
+                if(text.substring(first, first+6) === '<table') {
+                    raw += text.substring(first, text.indexOf('</table>') + 8);
+                    text = text.substring(text.indexOf('</table>') + 8, text.length);
+                } else if(text.substring(first, first+4) === '</p>' &&
                         raw.substring(raw.length-4, raw.length) !== '</p>') {
                     // Let's close out the </p>
                     raw += '</p>';
+                    text = text.substring(last+1, text.length);
                 } else if(text.substring(first, first+2) === '<p' &&
                         raw.substring(raw.length-3, raw.length) !== '<p>') {
                     //Found an open p
                     raw += '<p>';
+                    text = text.substring(last+1, text.length);
                 } else if(text.substring(first, last+1) === '<br>') {
                     // A nice clean break
                     raw += '<br>';
+                    text = text.substring(last+1, text.length);
                 } else if(text[first+1] === '/' &&
                         raw.substring(raw.length-4, raw.length) !== '</p>') {
                     raw += '</p>';
+                    text = text.substring(last+1, text.length);
                 } else if(raw.substring(raw.length-3, raw.length) !== '<p>' &&
                         text[first+1] !== '/') {
                     raw += '<p>';
+                    text = text.substring(last+1, text.length);
+                } else {
+                    text = text.substring(last+1, text.length);
                 }
                 if(last === text.length-1) {
                     // We are at the end of the text
                     break;
                 }
-                text = text.substring(last+1, text.length);
             } else {
                 // Somebody put '<' in as a character
                 raw += text.substring(0, second);

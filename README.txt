@@ -1,4 +1,6 @@
 Version 2016xxxx00:
+Tables can now be pasted
+Behat added to allow this
 Further improved unformatted to handle no tags
 Added German Language file
 Added option to not clean text (for tables and such)
