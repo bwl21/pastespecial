@@ -23,14 +23,15 @@
  */
 
 $string['pluginname'] = 'Paste special';
-$string['pastehere'] = 'Paste content here';
+$string['pastehere'] = '1. Content to be pasted:';
 $string['pastefromword'] = 'Paste from Microsoft Word';
 $string['pastefromgdoc'] = 'Paste from Google Document';
 $string['pastefromlibre'] = 'Paste from LibreWriter';
 $string['pastefromother'] = 'Paste from Other';
+$string['pastefrommoodle'] = 'Paste from Moodle';
 $string['pastestraight'] = 'Paste the text without cleaning HTML';
 $string['pasteunformatted'] = 'Paste as unformatted text';
-$string['paste'] = 'Paste';
+$string['paste'] = 'Complete paste (Ctrl+Shift+Enter)';
 $string['settings'] = 'Paste special settings';
 $string['wordCSS_desc'] = 'Allowed CSS properties for pasting from Microsoft Word. See default for format.';
 $string['gdocCSS_desc'] = 'Allowed CSS properties for pasting from Google Documents. See default for format.';
@@ -45,6 +46,15 @@ $string['gdocCSS_default'] = 'background-color,color,font-family,font-size,font-
 $string['libreCSS_default'] = 'background,color,font-size';
 $string['default'] = 'Set as default';
 $string['default_desc'] = 'Set this plugin to handle pasting by keyboard instead of automatically pasting';
-$string['pasteview'] = 'Preview:';
+$string['pasteview'] = '3. Paste preview:';
 $string['straight'] = 'Paste text straight';
 $string['straight_desc'] = 'Allows the user to paste text through pastespecial without cleaning HTML';
+$string['help'] = 'Help';
+$string['help_text'] = 'Follow the itemized steps to paste your text into Atto. This plugin will clean the messy HTML pasted from your source and place a cleaned version into Atto. If you want to keep your formatting (aesthetics), select the radio option based off of where you formatted this text. If you don\'t want to keep your formatting, select the radio option for "unformatted". To hide this text, click "'.$string['help'].'" again.';
+$string['cancel'] = 'Cancel';
+$string['clickthebutton'] = '4. Click the "'.$string['paste'].'" button';
+$string['height'] = 'Height';
+$string['height_desc'] = 'Sets the height of the popup, in %';
+$string['width'] = 'Width';
+$string['width_desc'] = 'Sets the width of the popup, in %';
+$string['step2'] = '2. Select from where the text was formatted';

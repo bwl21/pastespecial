@@ -91,7 +91,18 @@ var COMPONENTNAME = 'atto_pastespecial',
                 '<div id="{{elementid}}_{{CSS.IFRAME_VIEW}}" class="{{CSS.IFRAME_VIEW}}" contentEditable="true"></div>' +
             '</div>' +
             '<div class="atto_pastespecial_radios">' +
-                '<input type="radio" class="{{CSS.PASTEFROMWORD}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMWORD}}" checked>' +
+                '<p>{{get_string "step2" component}}</p>' +
+                '{{#if straight}}' +
+                    '<input type="radio" class="{{CSS.PASTESTRAIGHT}}" name="from"' +
+                    'id="{{elementid}}_{{CSS.PASTESTRAIGHT}}_1" checked/>' +
+                    '<label for="{{elementid}}_{{CSS.PASTESTRAIGHT}}_1">{{get_string "pastefrommoodle" component}}</label>' +
+                    '<br>' +
+                    '<input type="radio" class="{{CSS.PASTEFROMWORD}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMWORD}}"/>' +
+                '{{/if}}' +
+                '{{#if word}}' +
+                    '<input type="radio" class="{{CSS.PASTEFROMWORD}}" name="from"' +
+                    'id="{{elementid}}_{{CSS.PASTEFROMWORD}}"checked />' +
+                '{{/if}}' +
                 '<label for="{{elementid}}_{{CSS.PASTEFROMWORD}}">{{get_string "pastefromword" component}}</label>' +
                 '<br>' +
                 '<input type="radio" class="{{CSS.PASTEFROMGDOC}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMGDOC}}"/>' +
@@ -111,8 +122,11 @@ var COMPONENTNAME = 'atto_pastespecial',
                     '<label for="{{elementid}}_{{CSS.PASTESTRAIGHT}}">{{get_string "pastestraight" component}}</label>' +
                 '{{/if}}' +
             '</div>' +
+            '<div class="atto_pastespecial_help hidden">{{get_string "help_text" component}}</div>' +
             '<div class="mdl-align atto_pastespecial_button">' +
-                '<br>' +
+                '<p>{{get_string "clickthebutton" component}}</p>' +
+                '<button value="Cancel" type="button" class="cancel">{{get_string "cancel" component}}</button>' +
+                '<button value="Help" type="button" class="help">{{get_string "help" component}}</button>' +
                 '<button value="Paste" type="submit" class="submit">{{get_string "paste" component}}</button>' +
             '</div>' +
         '</form>';
@@ -138,6 +152,12 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
 
     // Will be a boolean whether or not we allow straight pasting
     _straight: null,
+
+    // Will be an integer value for height in %
+    _height: null,
+
+    // Will be an integer value for width in %
+    _width: null,
 
     // Will point to and hold the current selection when we handle pasting.
     _currentSelection: null,
@@ -168,6 +188,16 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         if(params.straight) {
             this._straight = params.straight;
         }
+        if(params.height) {
+            this._height = params.height;
+        } else {
+            this._height = '90';
+        }
+        if(params.width) {
+            this._width = params.width;
+        } else {
+            this._width = '90';
+        }
 
         // Add the button
         this.addButton({
@@ -197,8 +227,8 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             headerContent: M.util.get_string('pluginname', COMPONENTNAME),
             focusAfterHide: true,
             focusOnShowSelector: SELECTORS.PASTEAREA,
-            width: '90%',
-            height: '90%'
+            width: this._width + '%',
+            height: this._height + '%'
         });
 
         // Save the current selection of the editor.
@@ -212,8 +242,22 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
 
         // Set the click handler for the submit button.
         this._content.one('.submit').on('click', this._pasteContent, this);
+        this._content.one('.help').on('click', function() {
+            this._content.all('.atto_pastespecial_radios, .atto_pastespecial_help, atto_pastespecial_help' +
+            '.atto_pastespecial_contenteditable, .submit, .cancel').each(function() {
+                this.toggleClass('hidden');
+            });
+        }, this);
+        this._content.one('.cancel').on('click', function() {
+            this._content.ancestor().ancestor().one('button.closebutton').simulate('click');
+        }, this);
         this._content.all('input[type="radio"]').on('click', this._changeContent, this);
         this._content.one(SELECTORS.IFRAME).on('valuechange', this._changeContent, this);
+        this._content.delegate('key', function(e) {
+            if (e.ctrlKey && e.shiftKey) {
+                this._pasteContent(e);
+            }
+        }, 'enter', '.atto_pastespecial_iframe', this);
         this._content.ancestor().setStyle('height', '100%');
 
         // Set the iframe target for later use.
@@ -308,6 +352,7 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         this._content = Y.Node.create(template({
             component: COMPONENTNAME,
             straight: this._straight,
+            word: !this._straight,
             CSS: CSS
         }));
 

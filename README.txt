@@ -1,3 +1,10 @@
+Version 2016xxxxxx:
+Improved language strings
+Added "Paste from Moodle"
+Added keyboard shortcut for pasting
+Added help button
+Allowed width and height to be set as admin
+
 Version 2016021100:
 Further improved UI
 Tables can now be pasted

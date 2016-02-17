@@ -104,4 +104,28 @@ if ($ADMIN->fulltree) {
                                                 $desc,
                                                 $default);
     $settings->add($setting);
+
+    // Set height
+    $name = new lang_string('height', 'atto_pastespecial');
+    $desc = new lang_string('height_desc', 'atto_pastespecial');
+    $default = '90';
+
+    $setting = new admin_setting_configtext('atto_pastespecial/height',
+                                                $name,
+                                                $desc,
+                                                $default,
+                                                PARAM_INT);
+    $settings->add($setting);
+
+    // Set width
+    $name = new lang_string('width', 'atto_pastespecial');
+    $desc = new lang_string('width_desc', 'atto_pastespecial');
+    $default = '90';
+
+    $setting = new admin_setting_configtext('atto_pastespecial/width',
+                                                $name,
+                                                $desc,
+                                                $default,
+                                                PARAM_INT);
+    $settings->add($setting);
 }
