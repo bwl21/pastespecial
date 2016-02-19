@@ -4,6 +4,7 @@ Added "Paste from Moodle"
 Added keyboard shortcut for pasting
 Added help button
 Allowed width and height to be set as admin
+Added function to check potential source of pasted content
 
 Version 2016021100:
 Further improved UI

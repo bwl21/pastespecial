@@ -159,6 +159,9 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
     // Will be an integer value for width in %
     _width: null,
 
+    // Will be a boolean as to whether or not we have set the content source.
+    _setOnce: false,
+
     // Will point to and hold the current selection when we handle pasting.
     _currentSelection: null,
 
@@ -209,7 +212,6 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             this.editor.on('key', function(e) {
                 if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
                     this._displayDialogue();
-                    this._content.one('.atto_pastespecial_pastefromother').set('checked', true);
                 }
             }, 'down:86', this);
         }
@@ -230,6 +232,8 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             width: this._width + '%',
             height: this._height + '%'
         });
+
+        this._setOnce = false;
 
         // Save the current selection of the editor.
         this._currentSelection = this.get('host').getSelection();
@@ -293,6 +297,25 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         }
         this.markUpdated();
     },
+
+    /**
+     * Check the pasted content to see what the source is
+     *
+     * @method _findSource
+     *
+     */
+    _findSource: function(value) {
+        if (value.indexOf('docs-internal-guid') != -1) {
+            Y.one(SELECTORS.PASTEFROMGDOC).set('checked','true');
+        } else if (/<o:p><\/o:p>|class="MsoNormal"|style="(.|[\n\r])*?;mso-.*?:/.test(value)) {
+            Y.one(SELECTORS.PASTEFROMWORD).set('checked','true');
+        } else {
+            Y.one(SELECTORS.PASTEFROMOTHER).set('checked','true');
+        }
+
+        this._setOnce = true;
+    },
+
     /**
      * Handle the pasted information when the user changes view options
      *
@@ -303,13 +326,19 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         var value,
             checked;
 
-        // Figure out which option is checked.
-        checked = Y.one('input[name=from]:checked');
-
         // Obtain the pasted content.
         value = this._iframe.getHTML();
 
-        if (!checked.hasClass(CSS.PASTESTRAIGHT)) {
+        if (!this._setOnce) {
+            this._findSource(value);
+        }
+
+        // Figure out which option is checked.
+        checked = Y.one('input[name=from]:checked');
+
+        if (value === '') {
+            this._setOnce = false;
+        } else if (!checked.hasClass(CSS.PASTESTRAIGHT)) {
             if (checked.hasClass(CSS.PASTEFROMWORD)) {
                 value = this._cleanWord(value);
             }
