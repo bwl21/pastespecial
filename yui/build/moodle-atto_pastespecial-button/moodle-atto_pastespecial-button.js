@@ -41,6 +41,7 @@ var COMPONENTNAME = 'atto_pastespecial',
         PASTEFROMLIBRE: 'atto_pastespecial_pastefromlibre',
         PASTEFROMOTHER: 'atto_pastespecial_pastefromother',
         PASTEUNFORMATTED: 'atto_pastespecial_pasteunformatted',
+        PASTESTRAIGHT: 'atto_pastespecial_pastestraight',
         IFRAME: 'atto_pastespecial_iframe',
         IFRAME_VIEW: 'atto_pastespecial_iframe_view'
     },
@@ -51,6 +52,7 @@ var COMPONENTNAME = 'atto_pastespecial',
         PASTEFROMLIBRE: '.atto_pastespecial_pastefromlibre',
         PASTEFROMOTHER: '.atto_pastespecial_pastefromother',
         PASTEUNFORMATTED: '.atto_pastespecial_pasteunformatted',
+        PASTESTRAIGHT: '.atto_pastespecial_pastestraight',
         IFRAME: '.atto_pastespecial_iframe',
         IFRAMEID: '#atto_pastespecial_iframe',
         IFRAME_VIEW: '.atto_pastespecial_iframe_view'
@@ -75,37 +77,56 @@ var COMPONENTNAME = 'atto_pastespecial',
                'background-color']
     },
     TEMPLATE = '' +
-        '<form class="atto_form">' +
-            '<div style="display:inline-block;width:50%;">' +
+        '<form class="atto_form atto_pastespecial_form">' +
+            '<div class="atto_pastespecial_contenteditable atto_pastespecial_preview">' +
                 '<label for="{{elementid}}_{{CSS.IFRAME}}">' +
                     '{{get_string "pastehere" component}}' +
                 '</label>' +
-                '<div id="{{elementid}}_{{CSS.IFRAME}}" class="{{CSS.IFRAME}}" contentEditable="true"' +
-                'style="width:100%;height:400px;overflow-y:scroll;border: 1px solid grey"></div>' +
+                '<div id="{{elementid}}_{{CSS.IFRAME}}" class="{{CSS.IFRAME}}" contentEditable="true"></div>' +
             '</div>' +
-            '<div style="display:inline-block;width:50%;">' +
+            '<div class="atto_pastespecial_contenteditable atto_pastespecial_handled">' +
                 '<label for="{{elementid}}_{{CSS.IFRAME_VIEW}}">' +
                     '{{get_string "pasteview" component}}' +
                 '</label>' +
-                '<div id="{{elementid}}_{{CSS.IFRAME_VIEW}}" class="{{CSS.IFRAME_VIEW}}" contentEditable="true"' +
-                'style="width:100%;height:400px;overflow-y:scroll;border: 1px solid grey"></div>' +
+                '<div id="{{elementid}}_{{CSS.IFRAME_VIEW}}" class="{{CSS.IFRAME_VIEW}}" contentEditable="true"></div>' +
             '</div>' +
-            '<input type="radio" class="{{CSS.PASTEFROMWORD}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMWORD}}" checked>' +
-            '<label for="{{elementid}}_{{CSS.PASTEFROMWORD}}">{{get_string "pastefromword" component}}</label>' +
-            '<br>' +
-            '<input type="radio" class="{{CSS.PASTEFROMGDOC}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMGDOC}}"/>' +
-            '<label for="{{elementid}}_{{CSS.PASTEFROMGDOC}}">{{get_string "pastefromgdoc" component}}</label>' +
-            '<br>' +
-            '<input type="radio" class="{{CSS.PASTEFROMLIBRE}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMLIBRE}}"/>' +
-            '<label for="{{elementid}}_{{CSS.PASTEFROMLIBRE}}">{{get_string "pastefromlibre" component}}</label>' +
-            '<br>' +
-            '<input type="radio" class="{{CSS.PASTEFROMOTHER}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMOTHER}}"/>' +
-            '<label for="{{elementid}}_{{CSS.PASTEFROMOTHER}}">{{get_string "pastefromother" component}}</label>' +
-            '<br>' +
-            '<input type="radio" class="{{CSS.PASTEUNFORMATTED}}" name="from" id="{{elementid}}_{{CSS.PASTEUNFORMATTED}}"/>' +
-            '<label for="{{elementid}}_{{CSS.PASTEUNFORMATTED}}">{{get_string "pasteunformatted" component}}</label>' +
-            '<div class="mdl-align">' +
+            '<div class="atto_pastespecial_radios">' +
+                '<p>{{get_string "step2" component}}</p>' +
+                '{{#if straight}}' +
+                    '<input type="radio" class="{{CSS.PASTESTRAIGHT}}" name="from"' +
+                    'id="{{elementid}}_{{CSS.PASTESTRAIGHT}}_1" checked/>' +
+                    '<label for="{{elementid}}_{{CSS.PASTESTRAIGHT}}_1">{{get_string "pastefrommoodle" component}}</label>' +
+                    '<br>' +
+                    '<input type="radio" class="{{CSS.PASTEFROMWORD}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMWORD}}"/>' +
+                '{{/if}}' +
+                '{{#if word}}' +
+                    '<input type="radio" class="{{CSS.PASTEFROMWORD}}" name="from"' +
+                    'id="{{elementid}}_{{CSS.PASTEFROMWORD}}"checked />' +
+                '{{/if}}' +
+                '<label for="{{elementid}}_{{CSS.PASTEFROMWORD}}">{{get_string "pastefromword" component}}</label>' +
                 '<br>' +
+                '<input type="radio" class="{{CSS.PASTEFROMGDOC}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMGDOC}}"/>' +
+                '<label for="{{elementid}}_{{CSS.PASTEFROMGDOC}}">{{get_string "pastefromgdoc" component}}</label>' +
+                '<br>' +
+                '<input type="radio" class="{{CSS.PASTEFROMLIBRE}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMLIBRE}}"/>' +
+                '<label for="{{elementid}}_{{CSS.PASTEFROMLIBRE}}">{{get_string "pastefromlibre" component}}</label>' +
+                '<br>' +
+                '<input type="radio" class="{{CSS.PASTEFROMOTHER}}" name="from" id="{{elementid}}_{{CSS.PASTEFROMOTHER}}"/>' +
+                '<label for="{{elementid}}_{{CSS.PASTEFROMOTHER}}">{{get_string "pastefromother" component}}</label>' +
+                '<br>' +
+                '<input type="radio" class="{{CSS.PASTEUNFORMATTED}}" name="from" id="{{elementid}}_{{CSS.PASTEUNFORMATTED}}"/>' +
+                '<label for="{{elementid}}_{{CSS.PASTEUNFORMATTED}}">{{get_string "pasteunformatted" component}}</label>' +
+                '{{#if straight}}' +
+                    '<br>' +
+                    '<input type="radio" class="{{CSS.PASTESTRAIGHT}}" name="from" id="{{elementid}}_{{CSS.PASTESTRAIGHT}}"/>' +
+                    '<label for="{{elementid}}_{{CSS.PASTESTRAIGHT}}">{{get_string "pastestraight" component}}</label>' +
+                '{{/if}}' +
+            '</div>' +
+            '<div class="atto_pastespecial_help hidden">{{get_string "help_text" component}}</div>' +
+            '<div class="mdl-align atto_pastespecial_button">' +
+                '<p>{{get_string "clickthebutton" component}}</p>' +
+                '<button value="Cancel" type="button" class="cancel">{{get_string "cancel" component}}</button>' +
+                '<button value="Help" type="button" class="help">{{get_string "help" component}}</button>' +
                 '<button value="Paste" type="submit" class="submit">{{get_string "paste" component}}</button>' +
             '</div>' +
         '</form>';
@@ -128,6 +149,18 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
 
     // Will be a string that contains the CSS properties to be used with Other
     _otherStyle: null,
+
+    // Will be a boolean whether or not we allow straight pasting
+    _straight: null,
+
+    // Will be an integer value for height in %
+    _height: null,
+
+    // Will be an integer value for width in %
+    _width: null,
+
+    // Will be a boolean as to whether or not we have set the content source.
+    _setOnce: false,
 
     // Will point to and hold the current selection when we handle pasting.
     _currentSelection: null,
@@ -155,6 +188,19 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         } else {
             this._otherStyle = this._gdocStyle + this._wordStyle + this._libreStyle;
         }
+        if(params.straight) {
+            this._straight = params.straight;
+        }
+        if(params.height) {
+            this._height = params.height;
+        } else {
+            this._height = '90';
+        }
+        if(params.width) {
+            this._width = params.width;
+        } else {
+            this._width = '90';
+        }
 
         // Add the button
         this.addButton({
@@ -166,7 +212,6 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             this.editor.on('key', function(e) {
                 if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
                     this._displayDialogue();
-                    this._content.one('.atto_pastespecial_pastefromother').set('checked', true);
                 }
             }, 'down:86', this);
         }
@@ -184,9 +229,11 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             headerContent: M.util.get_string('pluginname', COMPONENTNAME),
             focusAfterHide: true,
             focusOnShowSelector: SELECTORS.PASTEAREA,
-            width: '90%',
-            height: '90%'
+            width: this._width + '%',
+            height: this._height + '%'
         });
+
+        this._setOnce = false;
 
         // Save the current selection of the editor.
         this._currentSelection = this.get('host').getSelection();
@@ -199,8 +246,23 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
 
         // Set the click handler for the submit button.
         this._content.one('.submit').on('click', this._pasteContent, this);
+        this._content.one('.help').on('click', function() {
+            this._content.all('.atto_pastespecial_radios, .atto_pastespecial_help, atto_pastespecial_help' +
+            '.atto_pastespecial_contenteditable, .submit, .cancel').each(function() {
+                this.toggleClass('hidden');
+            });
+        }, this);
+        this._content.one('.cancel').on('click', function() {
+            this._content.ancestor().ancestor().one('button.closebutton').simulate('click');
+        }, this);
         this._content.all('input[type="radio"]').on('click', this._changeContent, this);
         this._content.one(SELECTORS.IFRAME).on('valuechange', this._changeContent, this);
+        this._content.delegate('key', function(e) {
+            if (e.ctrlKey && e.shiftKey) {
+                this._pasteContent(e);
+            }
+        }, 'enter', '.atto_pastespecial_iframe', this);
+        this._content.ancestor().setStyle('height', '100%');
 
         // Set the iframe target for later use.
         this._iframe = Y.one(SELECTORS.IFRAME);
@@ -235,6 +297,25 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         }
         this.markUpdated();
     },
+
+    /**
+     * Check the pasted content to see what the source is
+     *
+     * @method _findSource
+     *
+     */
+    _findSource: function(value) {
+        if (value.indexOf('docs-internal-guid') != -1) {
+            Y.one(SELECTORS.PASTEFROMGDOC).set('checked','true');
+        } else if (/<o:p><\/o:p>|class="MsoNormal"|style="(.|[\n\r])*?;mso-.*?:/.test(value)) {
+            Y.one(SELECTORS.PASTEFROMWORD).set('checked','true');
+        } else {
+            Y.one(SELECTORS.PASTEFROMOTHER).set('checked','true');
+        }
+
+        this._setOnce = true;
+    },
+
     /**
      * Handle the pasted information when the user changes view options
      *
@@ -245,38 +326,45 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         var value,
             checked;
 
-        // Figure out which option is checked.
-        checked = Y.one('input[name=from]:checked');
-
         // Obtain the pasted content.
         value = this._iframe.getHTML();
 
-        if (checked.hasClass(CSS.PASTEFROMWORD)) {
-            value = this._cleanWord(value);
+        if (!this._setOnce) {
+            this._findSource(value);
         }
 
-        // Remove nasty browser/generator specific stuffs
-        value = value.replace(/<!--StartFragment-->/g,'');
-        value = value.replace(/<!--EndFragment-->/g,'');
-        value = value.replace(/<!--\[if support(.|[\n\r])*?-->/g,'');
-        value = value.replace(/<!--(.|[\n\r])*?<!\[endif\]-->/g,'');
-        value = value.replace(/<!--\[endif\]-->/g,'');
+        // Figure out which option is checked.
+        checked = Y.one('input[name=from]:checked');
 
-        // If they put something in there, let's handle it based on where it's from.
-        if (value !== '') {
-            if(checked.hasClass(CSS.PASTEFROMWORD)) {
-                value = this._handleWord(value);
-            } else if(checked.hasClass(CSS.PASTEFROMGDOC)) {
-                value = this._handleGDoc(value);
-            } else if(checked.hasClass(CSS.PASTEFROMLIBRE)) {
-                value = this._handleLibre(value);
-            } else if(checked.hasClass(CSS.PASTEFROMOTHER)) {
-                value = this._handleOther(value);
-            } else {
-                value = this._handleUnformatted(value);
+        if (value === '') {
+            this._setOnce = false;
+        } else if (!checked.hasClass(CSS.PASTESTRAIGHT)) {
+            if (checked.hasClass(CSS.PASTEFROMWORD)) {
+                value = this._cleanWord(value);
+            }
+
+            // Remove nasty browser/generator specific stuffs
+            value = value.replace(/<!--StartFragment-->/g,'');
+            value = value.replace(/<!--EndFragment-->/g,'');
+            value = value.replace(/<!--\[if support(.|[\n\r])*?-->/g,'');
+            value = value.replace(/<!--(.|[\n\r])*?<!\[endif\]-->/g,'');
+            value = value.replace(/<!--\[endif\]-->/g,'');
+
+            // If they put something in there, let's handle it based on where it's from.
+            if (value !== '') {
+                if(checked.hasClass(CSS.PASTEFROMWORD)) {
+                    value = this._handleWord(value);
+                } else if(checked.hasClass(CSS.PASTEFROMGDOC)) {
+                    value = this._handleGDoc(value);
+                } else if(checked.hasClass(CSS.PASTEFROMLIBRE)) {
+                    value = this._handleLibre(value);
+                } else if(checked.hasClass(CSS.PASTEFROMOTHER)) {
+                    value = this._handleOther(value);
+                } else {
+                    value = this._handleUnformatted(value);
+                }
             }
         }
-
         Y.one(SELECTORS.IFRAME_VIEW).setHTML(value);
     },
 
@@ -292,6 +380,8 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
         // Set the HTML content.
         this._content = Y.Node.create(template({
             component: COMPONENTNAME,
+            straight: this._straight,
+            word: !this._straight,
             CSS: CSS
         }));
 
@@ -402,7 +492,10 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             output += text.substring(0, first);
             if(last < second) {
                 // Found the first tag, now what?
-                if(text.substring(first, last+1) === '<br>'
+                if(text.substring(first, first+6) === '<table') {
+                    output += text.substring(first, text.indexOf('</table>') + 8);
+                    text = text.substring(text.indexOf('</table>') + 8, text.length);
+                } else if(text.substring(first, last+1) === '<br>'
                     || text.substring(first, last+13) === '<o:p>&nbsp;</o:p>') {
                     // A nice clean line break.
                     output += '<br>';
@@ -755,29 +848,38 @@ Y.namespace('M.atto_pastespecial').Button = Y.Base.create('button', Y.M.editor_a
             } else if(last < second || second === -1) {
                 // We found a tag, what's inside?
                 raw += text.substring(0, first);
-                if(text.substring(first, first+4) === '</p>' &&
+                if(text.substring(first, first+6) === '<table') {
+                    raw += text.substring(first, text.indexOf('</table>') + 8);
+                    text = text.substring(text.indexOf('</table>') + 8, text.length);
+                } else if(text.substring(first, first+4) === '</p>' &&
                         raw.substring(raw.length-4, raw.length) !== '</p>') {
                     // Let's close out the </p>
                     raw += '</p>';
+                    text = text.substring(last+1, text.length);
                 } else if(text.substring(first, first+2) === '<p' &&
                         raw.substring(raw.length-3, raw.length) !== '<p>') {
                     //Found an open p
                     raw += '<p>';
+                    text = text.substring(last+1, text.length);
                 } else if(text.substring(first, last+1) === '<br>') {
                     // A nice clean break
                     raw += '<br>';
+                    text = text.substring(last+1, text.length);
                 } else if(text[first+1] === '/' &&
                         raw.substring(raw.length-4, raw.length) !== '</p>') {
                     raw += '</p>';
+                    text = text.substring(last+1, text.length);
                 } else if(raw.substring(raw.length-3, raw.length) !== '<p>' &&
                         text[first+1] !== '/') {
                     raw += '<p>';
+                    text = text.substring(last+1, text.length);
+                } else {
+                    text = text.substring(last+1, text.length);
                 }
                 if(last === text.length-1) {
                     // We are at the end of the text
                     break;
                 }
-                text = text.substring(last+1, text.length);
             } else {
                 // Somebody put '<' in as a character
                 raw += text.substring(0, second);
