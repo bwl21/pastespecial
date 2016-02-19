@@ -2,7 +2,7 @@
 Feature: Atto Pastespecial
   To paste formatted text in Atto, I need to utilize Pastespecial
 
-# Add to /lib/tests/behat/behat_forms.php
+# Add these 15 to /lib/tests/behat/behat_forms.php
 #    /**
 #     * Sets the innerhtml for the specified selector
 #     *
@@ -85,3 +85,13 @@ Feature: Atto Pastespecial
     And I click on "form.atto_form .submit" "css_element"
     And I press "Save changes"
     Then I should see "Or only when redcolor I do this?"
+
+   @javascript
+   Scenario: Paste table and content into formatting
+    When I set the innerhtml of "atto_pastespecial_iframe" to "<p>Look at me</p><table id=\"table\"><tr><td>Cell</td></tr></table><p>Also here</p>"
+    And I click on "#_atto_pastespecial_pasteunformatted" "css_element"
+    And I click on "form.atto_form .submit" "css_element"
+    And I press "Save changes"
+    Then I should see "Look at me"
+    And I should see "Also here"
+    And "table" "css_element" should exist

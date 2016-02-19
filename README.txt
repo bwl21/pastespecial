@@ -1,4 +1,15 @@
-Version 2016xxxx00:
+Version 2016xxxxxx:
+Improved language strings
+Added "Paste from Moodle"
+Added keyboard shortcut for pasting
+Added help button
+Allowed width and height to be set as admin
+Added function to check potential source of pasted content
+
+Version 2016021100:
+Further improved UI
+Tables can now be pasted
+Behat added to allow this
 Further improved unformatted to handle no tags
 Added German Language file
 Added option to not clean text (for tables and such)
